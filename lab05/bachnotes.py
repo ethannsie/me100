@@ -81,8 +81,28 @@ D3, A3, D4, FS4, C5, D4, FS4, C5, D3, A3, D4, FS4, C5, D4, FS4, C5,
 G3, B3, D4, G4, B4, D4, G4, B4, G3, B3, D4, G4, B4, D4, G4, B4
 ]
 
+from machine import Pin, PWM, Timer
+
+# ----- buzzer PWM -----
+buzzer = PWM(Pin(27))
+buzzer.duty(512)      # 50% duty
+
+# ----- LED PWM (separate PWM timer/channel) -----
+led = PWM(Pin(13))
+led.freq(5000)        # LED brightness PWM frequency
+led.duty(512)         # medium brightness
+
+i = 0
+
+def play_note(timer):
+    global i
+    buzzer.freq(bach[i])
+    led.duty((i * 40) % 1023)   # brightness sweep
+    i += 1
+
+    if i >= len(bach):
+        i = 0
 
 
-
-
-
+tim = Timer(0)
+tim.init(period=200, mode=Timer.PERIODIC, callback=play_note)
