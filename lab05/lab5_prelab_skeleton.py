@@ -2,8 +2,8 @@ from machine import Pin, PWM, Timer
 from time import sleep
 
 ### Copy over led pinout setup command here ###
-led = Pin(13, Pin.OUT)
-# ext_led = Pin(15, Pin.OPEN_DRAIN) 
+#led = Pin(13, Pin.OUT)
+led = Pin(13, Pin.OPEN_DRAIN) 
 ######
 
 brightness = 0
