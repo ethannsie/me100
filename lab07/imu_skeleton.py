@@ -3,7 +3,7 @@ from time import sleep
 from lsm6dsox import LSM6DSOX
 
 # Initialize I2C (adjust pins if needed)
-i2c = I2C(0, scl=Pin(XX), sda=Pin(XX))
+i2c = I2C(0, scl=Pin(26), sda=Pin(25))
 
 # Create IMU object
 imu = LSM6DSOX(i2c)
