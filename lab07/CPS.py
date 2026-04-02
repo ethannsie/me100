@@ -22,18 +22,36 @@ def calculate_speed(timer):
     encoder_count = 0
 
 
-def duty_u16(value):
-    return int(value / 100 * (2 ** 16 - 1))
+# def duty_u16(value):
+#     return int(value / 100 * (2 ** 16 - 1))
 
+def pwm_percent(percent):
+    return int(percent * 1023 / 100)
 
-"""Connecting GPIO pins A0 and A1 to the signal-in of the H-Bridge"""
-motor_vpin = Pin(XX, mode=Pin.OUT)
-motor_gnd = Pin(XX, mode=Pin.OUT)
+def forward(speed):
+    AIN1.duty(pwm_percent(100))
+    AIN2.duty(pwm_percent(speed))
 
-""" percent Full power motor (sometimes does not run below 33%"""
-speed_as_percent = 30
-L1 = PWM(motor_vpin, freq=1000, duty_u16=duty_u16(speed_as_percent))
-motor_gnd.value(0)
+def reverse(speed):
+    AIN1.duty(pwm_percent(speed))
+    AIN2.duty(pwm_percent(100))
+
+def stop():
+    AIN1.duty(pwm_percent(100))
+    AIN2.duty(pwm_percent(100))
+
+# """AIN1 and AIN2"""
+# motor_vpin = Pin(XX, mode=Pin.OUT)
+# motor_gnd = Pin(XX, mode=Pin.OUT)
+# 
+# """ percent Full power motor (sometimes does not run below 33%"""
+# speed_as_percent = 30
+# L1 = PWM(motor_vpin, freq=1000, duty_u16=duty_u16(speed_as_percent))
+# motor_gnd.value(0)
+
+"""AIN1 and AIN2"""
+AIN1 = PWM(Pin(XX), freq=10000, duty=1023)
+AIN2 = PWM(Pin(XX), freq=10000, duty=1023)
 
 """See how many times the encoder is getting triggered"""
 encoder_0 = Pin(XX, mode=Pin.IN)
@@ -44,7 +62,22 @@ number_of_degrees_per_encoder_tick = 0.28
 t1 = Timer(1)
 t1.init(period=1000, mode=t1.PERIODIC, callback=calculate_speed)
 
-sleep(15)
+forward(0)
+sleep(2)
+
+forward(50)
+sleep(2)
+
+stop()
+sleep(2)
+
+reverse(50)
+sleep(2)
+
+reverse(0)
+sleep(2)
+
 t1.deinit()
-L1.deinit()
+AIN1.deinit()
+AIN2.deinit()
 
