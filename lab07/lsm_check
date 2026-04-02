@@ -1,0 +1,19 @@
+from machine import I2C, Pin
+from lsm6dsox import LSM6DSOX
+import time
+
+i2c = I2C(0, scl=Pin(14), sda=Pin(22))
+
+imu = LSM6DSOX(i2c)
+
+while True:
+    ax, ay, az = imu.accel()
+    gx, gy, gz = imu.gyro()
+    temp = imu.temperature()
+
+    print("Accel:", ax, ay, az)
+    print("Gyro:", gx, gy, gz)
+    print("Temp:", temp)
+    print("------")
+
+    time.sleep(0.2)
