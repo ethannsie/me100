@@ -1,4 +1,4 @@
-from machine import I2C
+from machine import I2C, Pin
 import time
 import math
 
@@ -126,3 +126,19 @@ class LSM6DSOX:
         data = self._read_reg(OUT_TEMP_L, 2)
         temp_raw = self._twos_comp(data[0] | (data[1] << 8))
         return 25 + (temp_raw / 256.0)
+    
+i2c = I2C(0, scl=Pin(14), sda=Pin(22))
+
+imu = LSM6DSOX(i2c)
+
+while True:
+    ax, ay, az = imu.accel()
+    gx, gy, gz = imu.gyro()
+    temp = imu.temperature()
+
+    print("Accel:", ax, ay, az)
+    print("Gyro:", gx, gy, gz)
+    print("Temp:", temp)
+    print("------")
+
+    time.sleep(0.2)
