@@ -5,7 +5,20 @@ from time import sleep
 
 encoder_count = 0
 
-
+def set_motor(speed_percent):
+    if speed_percent > 0:
+        # Forward
+        L1.duty_u16(duty_u16(speed_percent))
+        motor_gnd.value(0)
+    elif speed_percent < 0:
+        # Reverse
+        L1.duty_u16(0)
+        motor_gnd.value(1)
+    else:
+        # Stop (coast)
+        L1.duty_u16(0)
+        motor_gnd.value(0)
+        
 def counter(__):
     global encoder_count
     encoder_count = encoder_count + 1
@@ -28,6 +41,42 @@ def calculate_speed(timer):
 def pwm_percent(percent):
     return int(percent * 1023 / 100)
 
+<<<<<<< HEAD
+"""Connecting GPIO pins A0 and A1 to the signal-in of the H-Bridge"""
+motor_vpin = Pin(15, mode=Pin.OUT)
+motor_gnd = Pin(32, mode=Pin.OUT)
+
+""" percent Full power motor (sometimes does not run below 33%"""
+# speed_as_percent = 97
+# L1 = PWM(motor_vpin, freq=1000, duty_u16=duty_u16(speed_as_percent))
+L1 = PWM(motor_vpin, freq=1000)
+# Full forward
+
+while True:
+    set_motor(100)
+    sleep(2)
+
+    # 50% forward
+    set_motor(50)
+    sleep(2)
+
+    # Stop
+    set_motor(0)
+    sleep(2)
+
+    # 50% reverse
+    set_motor(-50)
+    sleep(2)
+
+    # Full reverse
+    set_motor(-100)
+    sleep(2)
+    
+    # Stop
+    set_motor(0)
+    sleep(2)
+    
+=======
 def forward(speed):
     AIN1.duty(pwm_percent(100))
     AIN2.duty(pwm_percent(speed))
@@ -52,9 +101,10 @@ def stop():
 """AIN1 and AIN2"""
 AIN1 = PWM(Pin(XX), freq=10000, duty=1023)
 AIN2 = PWM(Pin(XX), freq=10000, duty=1023)
+>>>>>>> 3d06d63c22a8c06e174c91ba4a167b6061025937
 
 """See how many times the encoder is getting triggered"""
-encoder_0 = Pin(XX, mode=Pin.IN)
+encoder_0 = Pin(26, mode=Pin.IN)
 encoder_0.irq(handler=counter, trigger=Pin.IRQ_RISING | Pin.IRQ_FALLING)
 
 """Find the average speed"""
@@ -80,4 +130,6 @@ sleep(2)
 t1.deinit()
 AIN1.deinit()
 AIN2.deinit()
+
+
 
