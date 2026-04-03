@@ -1,80 +1,80 @@
-from machine import ADC, Pin, PWM, Timer
+from machine import ADC, Pin, Timer
 from neopixel import NeoPixel
 from time import sleep
 
-# Set pins respectively
-xcontrol = Pin($$, mode=Pin.IN)
-ycontrol = Pin($$, mode=Pin.IN)
-button = Pin($$, mode=Pin.IN, pull=Pin.PULL_UP)
+xcontrol = Pin(34, mode=Pin.IN)
+ycontrol = Pin(39, mode=Pin.IN)
+button = Pin(14, mode=Pin.IN, pull=Pin.PULL_UP)
 
-# Assign DAC and ADC converter objects to each pin
 adc_x = ADC(xcontrol)
 adc_y = ADC(ycontrol)
-# adc.val(0)
-# ADC configs
-adc_x.atten(ADC.ATTN_11DB)  # change range of converter to be V_ref = 3.2
-adc_y.atten(ADC.ATTN_11DB)  # change range of converter to be V_ref = 3.2
-adc_val = 0  # set val of ADC to dummy value to start off
 
-pwr = Pin(2, Pin.OUT) # Initialize NeoPixel
+adc_x.atten(ADC.ATTN_11DB)
+adc_y.atten(ADC.ATTN_11DB)
+
+adc_val_x = 0
+adc_val_y = 0
+
+pwr = Pin(2, Pin.OUT)
 pwr.value(1)
 np = NeoPixel(Pin(0), 1)
 
-np[0] = (0,0,0) # Start with NeoPixel OFF
+np[0] = (0, 0, 0)
 np.write()
-print('Neopixel OFF')
 
 def position(timer):
-    global adc_x
-    global adc_y
-    global adc_val_x
-    global adc_val_y
+    global adc_val_x, adc_val_y
     adc_val_x = adc_x.read_u16()
     adc_val_y = adc_y.read_u16()
-    sw_val = button()
+    print("X =", adc_val_x, "Y =", adc_val_y)
 
 def NEO_cb(timer):
+    global adc_val_x, adc_val_y
+
     red = 0
     green = 0
     blue = 0
-    global adc_x
-    global adc_y
-    
-    # When the joystick is at its "neutral" or unmoved position, 
-    # there should not be any light
 
-    #See whiteboard for diagram of Joystick and NEO behavior
+    # adjust these based on your measured center values
+    x_center_low = 28000
+    x_center_high = 38000
+    y_center_low = 28000
+    y_center_high = 38000
 
-    if $$$$$ < adc_val_x < $$$$$ and $$$$$ < adc_val_y < $$$$$:
-        green = 0
+    # center = off
+    if x_center_low < adc_val_x < x_center_high and y_center_low < adc_val_y < y_center_high:
         red = 0
+        green = 0
         blue = 0
 
-    # NEO should become more green as joystick is pushed further left
-    elif adc_val_x < $$$$$: 
-        green = int(($$$$$-adv_val_x) * 255/$$$$$)
-                     
-    # What about blue? 
-    else:     
-        ... 
+    # left = green
+    elif adc_val_x < x_center_low:
+        green = int((x_center_low - adc_val_x) * 255 / x_center_low)
 
-    # And red? 
-    if adc_val_y < $$$$$: 
-        ...
+    # right = blue
+    elif adc_val_x > x_center_high:
+        blue = int((adc_val_x - x_center_high) * 255 / (65535 - x_center_high))
 
-    # Feel free to change the inequalities to number ranges that make more sense to you. 
-    # If done correctly, NEO should also show some intermediary colors when the joystick is swiveled! (ex. a pinkish/purple)
+    # up/down controls red
+    if adc_val_y < y_center_low:
+        red = int((y_center_low - adc_val_y) * 255 / y_center_low)
+    elif adc_val_y > y_center_high:
+        red = int((adc_val_y - y_center_high) * 255 / (65535 - y_center_high))
+
+    red = max(0, min(255, red))
+    green = max(0, min(255, green))
+    blue = max(0, min(255, blue))
 
     np[0] = (red, green, blue)
     np.write()
 
 t3 = Timer(3)
-t3.init(period=200, mode=t3.PERIODIC, callback=position)
+t3.init(period=200, mode=Timer.PERIODIC, callback=position)
+
 t4 = Timer(4)
-t4.init(period=100, mode=t4.PERIODIC, callback=NEO_cb)
+t4.init(period=100, mode=Timer.PERIODIC, callback=NEO_cb)
 
 sleep(30)
+
 t3.deinit()
 t4.deinit()
-
-        
